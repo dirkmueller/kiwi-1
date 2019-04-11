@@ -462,7 +462,93 @@ configuration of the `devel` user on the other hand depends on the profile.
 Defining Repositories and Adding or Removing Packages
 =====================================================
 
-A crucial part of each appliance
+A crucial part of each appliance is the package and repository
+selection. KIWI allows the end user to completely customize the selection
+of repositories and packages via the `repository` and `packages` elements.
+
+
+Adding repositories
+-------------------
+
+KIWI installs packages into your appliance from the repositories defined in
+the image description. Therefore at least one repository **must** be
+defined, as KIWI will otherwise not be able to fetch any packages.
+
+A repository is added to the description via the `repository` element,
+which is a child of the top-level `image` element:
+
+.. code-block:: xml
+
+   <image schemaversion="6.9" name="JeOS-Tumbleweed">
+     <!-- snip -->
+     <repository type="rpm-md" alias="kiwi" priority="1">
+       <source path="obs://Virtualization:Appliances:Builder/Factory"/>
+     </repository>
+     <repository type="yast2" alias="Tumbleweed" imageinclude="true">
+       <source path="http://download.opensuse.org/tumbleweed/repo/oss"/>
+     </repository>
+   </image>
+
+In the above snippet we defined two repositories:
+
+1. The repository belonging to the project
+   *Virtualization:Appliances:Builder* on the Open Build Service (OBS)
+
+2. The YaST repository available via the URL:
+   `<http://download.opensuse.org/tumbleweed/repo/oss>`_, which will also
+   be included in the final appliance.
+
+
+The `repository` element accepts one `source` child element, which
+contains the URL to the repository in an appropriate format and the
+following optional attributes:
+
+.. FIXME: What's the advantage/use-case for type="yast2"
+
+- `type`: repository type, accepts one of the following values: `apt-deb`,
+  `apt-rpm`, `deb-dir`, `mirrors`, `red-carpet`, `rpm-dir`, `rpm-md`,
+  `slack-site`, `up2date-mirrors`, `urpmi`, `yast2`.
+  For ordinary RPM repositories use `rpm-md`, for ordinary APT repositories
+  `apt-deb`. `yast2` can be used for RPM repositories for SUSE based
+  distributions.
+
+- `imageinclude`: Specify whether or not this repository should be
+  added to the resulting image, defaults to false.
+
+- `imageonly`: A repository with `imageonly="true"` will not be available
+  during image build, but only in the resulting appliance. Defaults to
+  false.
+
+- `priority`: A integer priority for all packages in this repository. If
+  the exact same package is available in more than one repository, then the
+  one with the highest priority is used.
+
+- `alias`: Alias name to be used for this repository, it will appear as the
+  repository's name in the image. If not specified KIWI will construct an
+  alias from the path in the `source` child element (replacing each `/`
+  with a `_`).
+
+- `repository_gpgcheck`: Specify whether or not this specific repository is
+  configured to to run repository signature validation. If not set, the
+  package manager's default is used.
+
+- `package_gpgcheck`: Boolean value that specifies whether each package's
+  GPG signature will be verified. If omitted, the package manager's default
+  will be used
+
+- `components`: Distribution components used for `deb` repositories,
+  defaults to `main`.
+
+- `distribution`: Distribution name information, used for deb repositories.
+
+- `profiles`: List of profiles to which this repository applies.
+
+.. TODO: username & password are supported, but no clue what they are for?
+
+.. _xml-description-supported-supported-repository-paths:
+
+Supported repository paths
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 Stripping files from the appliance
