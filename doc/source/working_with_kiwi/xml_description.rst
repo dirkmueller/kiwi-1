@@ -1,8 +1,11 @@
-The Image Description
-=====================
+.. _xml-description:
 
-An image description is a XML file that defines properties of the appliance
-that will be build by KIWI, for example:
+=======================
+ The Image Description
+=======================
+
+The image description is a XML file that defines properties of the
+appliance that will be build by KIWI, for example:
 
 - image type (e.g. QEMU disk image, PXE bootable image, Vagrant box, etc.)
 - partition layout
@@ -15,7 +18,7 @@ schema can be found in :ref:`schema-docs`.
 
 
 The `image` Element
--------------------
+===================
 
 The image description consists of the root element `image` and its
 children, for example:
@@ -37,12 +40,13 @@ above example):
   automatically convert your image description from an older schema
   version to the most recent one (it will perform this only internally and
   won't modify your :file:`config.xml`).
+  If in doubt, use the latest schema version.
 
 The `name` attribute will be used to create the bootloader entry, however
 it can be inconvenient to use as it must be POSIX-safe. You can therefore
 provide an alternative name that will be displayed in the bootloader via
 the attribute `displayName`, which doesn't have the same strict rules as
-`name`:
+`name` (it can contain spaces and slashes):
 
 .. code-block:: xml
 
@@ -54,9 +58,9 @@ the attribute `displayName`, which doesn't have the same strict rules as
 
 
 The `description` Element
--------------------------
+=========================
 
-The `description` element, contains some high level information about your
+The `description` element, contains some high level information about the
 image:
 
 .. code-block:: xml
@@ -94,12 +98,12 @@ should be always set to `system`.
 
 
 The `preferences` Element
--------------------------
+=========================
 
 The mandatory `preferences` element contains the definition of the various
 enabled image types (so-called build types). Each of these build types can
 be supplied with attributes specific to that image type, which we described
-in section :ref:`xml-description-build-types`.
+in the section :ref:`xml-description-build-types`.
 
 The elements that are not image type specific are presented afterwards in
 section :ref:`xml-description-preferences-common-elements`.
@@ -108,7 +112,7 @@ section :ref:`xml-description-preferences-common-elements`.
 .. _xml-description-build-types:
 
 Build Types
-^^^^^^^^^^^
+-----------
 
 A build type defines the type of an appliance that is produced by KIWI, for
 instance, a live ISO image or a virtual machine disk.
@@ -133,10 +137,10 @@ attributes are optional and can be used to customize an image further. In
 the above example we created an ISO image, with the an ext4 filesystem
 [#f2]_.
 
-It is possible to provide **multiple** `type` elements with different
-`image` attributes inside the preferences section. For instance, the
-following XML snippet can be used to create a live image, an OEM
-installation image, and a virtual machine disk of the same appliance:
+It is possible to provide **multiple** `type` elements with **different**
+`image` attributes inside the preferences section. The following XML
+snippet can be used to create a live image, an OEM installation image, and
+a virtual machine disk of the same appliance:
 
 .. code-block:: xml
 
@@ -165,7 +169,7 @@ installation image, and a virtual machine disk of the same appliance:
    </image>
 
 Note the additional attribute `primary` in the Live ISO image build
-type. KIWI will by default build the image which attribute `primary` is set
+type. KIWI will by default build the image which `primary` attribute is set
 to `true`.
 
 KIWI supports the following values for the `image` attribute (further
@@ -206,6 +210,8 @@ above, `oemconfig` is a subelement of `<type image="oem" ...>`):
 - `vagrantconfig`: instructs KIWI to build a Vagrant box instead of a
   standard virtual machine image, see :ref:`setup_vagrant`
 
+.. FIXME: this is not helpful:
+
 Please consult the :ref:`schema-docs` for concerning the documentation of
 the remaining child-elements: `machine`, `size` and `systemdisk`.
 
@@ -213,7 +219,7 @@ the remaining child-elements: `machine`, `size` and `systemdisk`.
 .. _xml-description-preferences-common-elements:
 
 Common Elements
-^^^^^^^^^^^^^^^
+---------------
 
 Now that we have covered the `type` element, we shall return to the
 remaining child-elements of `preferences`:
@@ -243,9 +249,9 @@ remaining child-elements of `preferences`:
   other versions of the same distribution).
 
 - `rpm-excludedocs`: Boolean value that instructs RPM whether to install
-  documentation with packages or not (currently this setting has only an
-  effect for zypper). Please bear in mind that enabling this can have quite
-  a negative impact on user-experience and should thus be used with care.
+  documentation with packages or not. Please bear in mind that enabling
+  this can have quite a negative impact on user-experience and should thus
+  be used with care.
 
 - `bootloader-theme` and `bootsplash-theme`: themes for the bootloader and
   the bootsplash-screen. These themes have to be either built-in to the
@@ -253,7 +259,7 @@ remaining child-elements of `preferences`:
 
 
 An example excerpt from a image description using these child-elements of
-`preferences`, results in the following:
+`preferences`, results in the following image description:
 
 .. code-block:: xml
 
@@ -278,7 +284,7 @@ An example excerpt from a image description using these child-elements of
 .. _xml-description-image-profiles:
 
 Image Profiles
---------------
+==============
 
 In the previous section we have covered build types, that are represented
 in the image description as the `type` element. We have also shown how it
@@ -363,7 +369,7 @@ example.
 .. _xml-description-adding-users:
 
 Adding Users
-------------
+============
 
 User accounts can be added or modified via the `users` element, which
 supports a list of multiple `user` child elements:
@@ -372,8 +378,15 @@ supports a list of multiple `user` child elements:
 
    <image schemaversion="6.9" name="JeOS-Tumbleweed">
      <users>
-       <user password="this_is_soo_secure" home="/home/me" name="me" groups="users" pwdformat="plain" />
-       <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root" groups="root"/>
+       <user
+         password="this_is_soo_insecure"
+         home="/home/me" name="me"
+         groups="users" pwdformat="plain"
+       />
+       <user
+         password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0"
+         home="/root" name="root" groups="root"
+       />
      </users>
    </image>
 
@@ -391,7 +404,7 @@ Additionally, the following optional attributes can be specified:
   appended to the user's supplementary groups. When no groups are assigned
   then the system's default primary group will be used [#f3]_.
 
-- `id`: The user id of this account.
+- `id`: The numeric user id of this account.
 
 - `pwdformat`: The format in which `password` is provided, either `plain`
   or `encrypted` (the latter is the default).
@@ -399,9 +412,9 @@ Additionally, the following optional attributes can be specified:
 - `password`: The password for this user account. It can be provided either
   in cleartext form (`pwdformat="plain"`) or in `crypt`'ed form
   (`pwdformat="encrypted"`). Plain passwords are discouraged, as everyone
-  with access to the image description would know the password. Thus
-  generate a hash of your password, e.g. with the `mkpasswd` tool
-  (available in most Linux distributions via the `whois` package):
+  with access to the image description would know the password. It is
+  recommended to generate a hash of your password, e.g. with the `mkpasswd`
+  tool (available in most Linux distributions via the `whois` package):
 
   .. code:: bash
 
@@ -421,31 +434,39 @@ The `users` element furthermore accepts a list of profiles (see
      </profiles>
      <!-- snip -->
      <users>
-       <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root" groups="root"/>
+       <user
+         password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0"
+         home="/root" name="root" groups="root"
+       />
      </users>
      <users profiles="VM">
-       <user password="$1$blablabl$FRTFJZxMPfM6LA1g0EZ5h1" home="/home/devel" name="devel"/>
+       <user
+         password="$1$blablabl$FRTFJZxMPfM6LA1g0EZ5h1"
+         home="/home/devel" name="devel"
+       />
      </users>
      <users profiles="shared_VM">
-       <user password="super_secr4t" home="/share/devel" name="devel" groups="users,devel" pwdformat="plain"/>
+       <user
+         password="super_secr4t" pwdformat="plain"
+         home="/share/devel" name="devel" groups="users,devel"
+       />
      </users>
    </image>
 
 Here the settings for the root user are shared among all appliances. The
-configuration of the `devel` user on the other hand depends on the
-profile.
+configuration of the `devel` user on the other hand depends on the profile.
 
 
 .. _xml-description-repositories-and-packages:
 
 Defining Repositories and Adding or Removing Packages
------------------------------------------------------
+=====================================================
 
 A crucial part of each appliance
 
 
 Stripping files from the appliance
-----------------------------------
+==================================
 
 .. [#f1] `RELAX NG <https://en.wikipedia.org/wiki/RELAX_NG>`_ is a
          so-called schema language: it describes the structure of a XML

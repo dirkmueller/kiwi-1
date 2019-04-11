@@ -32,7 +32,7 @@ configured system in a single file) of a Linux distribution in two steps:
 KIWI executes these steps using the following components, which it expects
 to find in the *description directory*:
 
-#. ``config.xml`` image description
+#. ``config.xml``: :ref:`xml-description`
 
    This XML file contains the image description, which is a collection of
    general settings of the final image, like the partition table, installed
