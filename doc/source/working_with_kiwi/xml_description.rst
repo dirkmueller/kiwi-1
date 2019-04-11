@@ -550,9 +550,198 @@ following optional attributes:
 Supported repository paths
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+The actual location of a repository is specified in the `source` child
+element of `repository` via its only attribute `path`. KIWI supports the
+following paths types:
 
-Stripping files from the appliance
-==================================
+- `http://URL` or `https://URL` or `ftp://URL`: a URL to the repository
+  available via HTTP(s) or FTP.
+
+- `obs://$PROJECT/$REPOSITORY`: evaluates to the repository `$REPOSITORY`
+  of the project `$PROJECT` available in the Open Build Service (OBS). By
+  default KIWI will look for projects on `<build.opensuse.org>`, but this
+  can be overridden by providing an URL to a different OBS instance as
+  follows:
+
+  .. code-block:: xml
+
+     <image schemaversion="6.9" name="JeOS-Tumbleweed">
+       <!-- snip -->
+       <repository type="rpm-md" alias="test">
+         <source path="obs://foo.org:myproject:test/Factory"/>
+       </repository>
+     </image>
+
+  Here the `test` repository would be configured as the repository with the
+  name `Factory` of the project `myproject:test` on the Open Build Service
+  available via the URL `foo.org`.
+
+- `obsrepositories:/`: special path only available for builds using the
+  Open Build Service. The configured repositories of the project to which
+  the KIWI image belongs to will be included inside the final appliance.
+
+- `dir:///path/to/directory` or `file:///path/to/file`: an absolute path to
+  a local directory or file available on the host building the
+  appliance.
+
+- `iso:///path/to/image.iso`: the specified ISO image will be mounted
+  during the build of the KIWI image and the repository configured to point
+  to the mounted ISO.
+
+
+Adding and removing packages
+----------------------------
+
+Now that we have defined the repositories, we can define which packages
+should be installed on the image. This is achieved via the `packages`
+element which includes the packages that should be installed, ignore or
+removed via individual `package` child elements:
+
+.. code-block:: xml
+
+   <image schemaversion="6.9" name="JeOS-Tumbleweed">
+     <!-- snip -->
+     <repository type="yast2" alias="Tumbleweed" imageinclude="true">
+       <source path="http://download.opensuse.org/tumbleweed/repo/oss"/>
+     </repository>
+     <packages type="bootstrap">
+       <package name="udev"/>
+       <package name="filesystem"/>
+       <package name="openSUSE-release"/>
+       <!-- additional packages installed before the chroot is created -->
+     </packages>
+     <packages type="image">
+       <package name="patterns-openSUSE-base"/>
+       <!-- additional packages to be installed into the chroot -->
+     </packages>
+   </image>
+
+The `packages` element provides a collection of different child elements
+that instruct KIWI when and how to perform package installation or
+removal. Each `packages` element acts as a group, whose behavior can be
+configured via the following attributes:
+
+- `type`: either `bootstrap`, `image`, `delete` or a build type (see:
+  :ref:`xml-description-build-types`). Packages for `type="bootstrap"` are
+  pre-installed to populate the images' root file system before chrooting
+  into it. Packages in `type="image"` are installed immediately after the
+  initial chroot into the new root file system. Packages in `type="delete"`
+  are removed after the *Prepare operation*. And packages which belong to a
+  build type are only installed when that specific build type is currently
+  processed by KIWI.
+
+- `profiles`: a list of profiles to which this package selection applies
+  (see :ref:`xml-description-image-profiles`).
+
+- `patternType`: selection type for patterns, supported values are:
+  `onlyRequired`, `plusRecommended`, see:
+  :ref:`xml-description-product-and-namedCollection-element`.
+
+We will describe the different child elements of `packages` in the following
+sections.
+
+.. _xml-description-package-element:
+
+The `package` element
+^^^^^^^^^^^^^^^^^^^^^
+
+The `package` element represents a single package to be installed (or
+removed), whose name is specified via the mandatory `name` attribute:
+
+.. code-block:: xml
+
+   <image schemaversion="6.9" name="JeOS-Tumbleweed">
+     <!-- snip -->
+     <packages type="bootstrap">
+       <package name="udev"/>
+     </packages>
+   </image>
+
+which adds the package `udev` to the list of packages to be added to the
+initial filesystem.
+
+Packages can also be included only on specific architectures via the `arch`
+attribute. KIWI compares the `arch` attributes value with the output of
+`uname -m`.
+
+.. code-block:: xml
+
+   <image schemaversion="6.9" name="JeOS-Tumbleweed">
+     <!-- snip -->
+     <packages type="image">
+       <package name="grub2"/>
+       <package name="grub2-x86_64-efi" arch="x86_64"/>
+       <package name="shim" arch="x86_64"/>
+     </packages>
+   </image>
+
+which results in `grub2-x86_64-efi` and `shim` being only installed on 64
+Bit images, but GRUB2 also on 32 Bit images.
+
+
+The `ignore` element
+^^^^^^^^^^^^^^^^^^^^
+
+Packages can be explicitly ignored inside a `packages` collection, e.g. to
+not remove certain dependencies in `<packages type="delete">`. This is
+achieved by adding a `ignore` child element with the mandatory `name`
+attribute set to the package name to be ignored during the corresponding
+transaction. Optionally one can also specify the architecture in via the
+`arch` similarly to :ref:`xml-description-package-element`.
+
+
+.. _xml-description-archive-element:
+
+The `archive` element
+^^^^^^^^^^^^^^^^^^^^^
+
+It is sometimes necessary to include additional packages into the image
+which are not available in the package manager's native format. KIWI
+supports the inclusion of ordinary archives via the `archive` element,
+whose `name` attribute specifies the filename of the archive (KIWI looks
+for the archive in the image description folder).
+
+.. code-block:: xml
+
+   <packages type="image">
+     <archive name="custom-archive.tgz"/>
+   </packages>
+
+KIWI will extract the archive into the root directory of the image using
+`GNU tar <https://www.gnu.org/software/tar/>`_, thus only archives
+supported by it can be included.
+
+Additionally, KIWI can be include the archive inside the inside the
+*initrd* by setting the optional attribute `bootinclude` to `"true"`.
+
+.. _xml-description-product-and-namedCollection-element:
+
+The `product` and `namedCollection` element
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+KIWI supports the inclusion of openSUSE products or of namedCollections
+(patterns in SUSE based distributions or groups for RedHat based
+distributions). These can be added via the `product` and `namedCollection`
+child elements, which both take the mandatory `name` attribute and the
+optional `arch` attribute.
+
+`product` and `namedCollection` can be utilized to shorten the list of
+packages that need to be added to the image description tremendously
+file. A named pattern, specified with the namedCollection element is a
+representation of a predefined list of packages. Specifying a pattern will
+install all packages listed in the named pattern. Support for patterns is
+distribution specific and available in SLES, openSUSE, CentOS, RHEL and
+Fedora. The optional `patternType` attribute on the packages element allows
+you to control the installation of dependent packages. You may assign one
+of the following values to the `patternType` attribute:
+
+- `onlyRequired`: Incorporates only patterns and packages that the
+  specified patterns and packages require. This is a "hard dependency" only
+  resolution.
+
+- `plusRecommended`: Incorporates patterns and packages that are required
+  and recommended by the specified patterns and packages.
+
 
 .. [#f1] `RELAX NG <https://en.wikipedia.org/wiki/RELAX_NG>`_ is a
          so-called schema language: it describes the structure of a XML

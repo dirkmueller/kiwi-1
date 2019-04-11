@@ -79,7 +79,7 @@ to find in the *description directory*:
 #. Archives included in the :file:`config.xml` file.
 
    The archives that are included in `<packages>` using the `<archive>`
-   element:
+   element (see :ref:`xml-description-archive-element`):
 
    .. code:: xml
 
