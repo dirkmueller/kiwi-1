@@ -398,10 +398,9 @@ function baseStripInfos {
 #--------------------------------------
 function baseStripAndKeep {
     # /.../
-    # helper function for strip* functions
-    # read stdin lines of files to check 
-    # for removing
-    # - params - files which should be keep
+    # helper function for the baseStrip* functions
+    # reads the list of files to check from stdin for removing
+    # - params - files which should be kept
     # ----
     local keepFiles="$*"
     local found

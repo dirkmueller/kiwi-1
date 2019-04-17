@@ -29,8 +29,8 @@ children, for example:
 
    <?xml version="1.0" encoding="utf-8"?>
 
-   <image schemaversion="6.9" name="LimeJeOS-Leap-15.0">
-       <!-- all setting belong here -->
+   <image schemaversion="7.0" name="LimeJeOS-Leap-15.0">
+       <!-- all settings belong here -->
    </image>
 
 The `image` element requires the following two attributes (as shown in the
@@ -54,7 +54,7 @@ the attribute `displayName`, which doesn't have the same strict rules as
 
    <?xml version="1.0" encoding="utf-8"?>
 
-   <image schemaversion="6.9" name="LimeJeOS-Leap-15.0" displayName="LimeJeOS Leap 15.0">
+   <image schemaversion="7.0" name="LimeJeOS-Leap-15.0" displayName="LimeJeOS Leap 15.0">
        <!-- all setting belong here -->
    </image>
 
@@ -67,7 +67,7 @@ image:
 
 .. code-block:: xml
 
-   <image schemaversion="6.9" name="LimeJeOS-Leap-15.0">
+   <image schemaversion="7.0" name="LimeJeOS-Leap-15.0">
 
      <description type="system">
        <author>Jane Doe</author>
@@ -123,7 +123,7 @@ For example, a live ISO image is specified as follows:
 
 .. code-block:: xml
 
-   <image schemaversion="6.9" name="LimeJeOS-Leap-15.0">
+   <image schemaversion="7.0" name="LimeJeOS-Leap-15.0">
      <preferences>
        <type image="iso" primary="true" flags="overlay" hybridpersistent_filesystem="ext4" hybridpersistent="true"/>
        <!-- additional preferences -->
@@ -146,7 +146,7 @@ a virtual machine disk of the same appliance:
 
 .. code-block:: xml
 
-   <image schemaversion="6.9" name="LimeJeOS-Leap-15.0">
+   <image schemaversion="7.0" name="LimeJeOS-Leap-15.0">
      <preferences>
        <!-- Live ISO -->
        <type image="iso" primary="true" flags="overlay" hybridpersistent_filesystem="ext4" hybridpersistent="true"/>
@@ -227,9 +227,9 @@ Now that we have covered the `type` element, we shall return to the
 remaining child-elements of `preferences`:
 
 - `version`: A version number of this image. We recommend to use the
-  following format: **Major.Minor.Release**, however other versions are
-  possible, e.g. one can use the version of the underlying operating
-  system.
+  following format: **Major.Minor.Release**, however other versioning
+  schemes are possible, e.g. one can use the version of the underlying
+  operating system.
 
 - `packagemanager`: Specify the package manager that will be used to download
   and install the packages for your appliance. Currently the following package
@@ -265,7 +265,7 @@ An example excerpt from a image description using these child-elements of
 
 .. code-block:: xml
 
-   <image schemaversion="6.9" name="OpenSUSE-Leap-15.0">
+   <image schemaversion="7.0" name="OpenSUSE-Leap-15.0">
      <!-- snip -->
      <preferences>
        <version>15.0</version>
@@ -297,10 +297,10 @@ can only include multiple build types with **different** settings for
 
 In certain cases this is undesirable, for instance when building multiple
 very similar virtual machine disks. Then one would have to duplicate the
-whole :file:`config.xml` for each virtual machine. KIWI supports profiles
+whole :file:`config.xml` for each virtual machine. KIWI supports *profiles*
 to work around this issue.
 
-A profile is a namespace for additional settings that can be applied by
+A *profile* is a namespace for additional settings that can be applied by
 KIWI on top of the default settings (or other profiles), thereby allowing
 to build multiple appliances with the same build type but with different
 configurations.
@@ -311,7 +311,7 @@ format).
 
 .. code-block:: xml
 
-   <image schemaversion="6.9" name="OpenSUSE-Leap-15.0">
+   <image schemaversion="7.0" name="OpenSUSE-Leap-15.0">
      <!-- snip -->
      <profiles>
        <profile name="QEMU" description="virtual machine for QEMU"/>
@@ -335,7 +335,7 @@ Each profile is declared via the element `profile`, which itself must be a
 child of `profiles` and must contain the `name` and `description`
 attributes. The `description` is only present for documentation purposes,
 `name` on the other hand is used to instruct KIWI which profile to build
-via the command line. Additionally one can provide the boolean attribute
+via the command line. Additionally, one can provide the boolean attribute
 `import`, which defines whether this profile should be used by default when
 KIWI is invoked via the command line.
 
@@ -378,7 +378,7 @@ supports a list of multiple `user` child elements:
 
 .. code-block:: xml
 
-   <image schemaversion="6.9" name="JeOS-Tumbleweed">
+   <image schemaversion="7.0" name="JeOS-Tumbleweed">
      <users>
        <user
          password="this_is_soo_insecure"
@@ -415,8 +415,9 @@ Additionally, the following optional attributes can be specified:
   in cleartext form (`pwdformat="plain"`) or in `crypt`'ed form
   (`pwdformat="encrypted"`). Plain passwords are discouraged, as everyone
   with access to the image description would know the password. It is
-  recommended to generate a hash of your password, e.g. with the `mkpasswd`
-  tool (available in most Linux distributions via the `whois` package):
+  recommended to generate a hash of your password, e.g. using the
+  ``mkpasswd`` tool (available in most Linux distributions via the
+  ``whois`` package):
 
   .. code:: bash
 
@@ -429,7 +430,7 @@ The `users` element furthermore accepts a list of profiles (see
 
 .. code-block:: xml
 
-   <image schemaversion="6.9" name="JeOS-Tumbleweed">
+   <image schemaversion="7.0" name="JeOS-Tumbleweed">
      <profiles>
        <profile name="VM" description="standard virtual machine"/>
        <profile name="shared_VM" description="virtual machine shared by everyone"/>
@@ -481,12 +482,12 @@ which is a child of the top-level `image` element:
 
 .. code-block:: xml
 
-   <image schemaversion="6.9" name="JeOS-Tumbleweed">
+   <image schemaversion="7.0" name="JeOS-Tumbleweed">
      <!-- snip -->
      <repository type="rpm-md" alias="kiwi" priority="1">
        <source path="obs://Virtualization:Appliances:Builder/Factory"/>
      </repository>
-     <repository type="yast2" alias="Tumbleweed" imageinclude="true">
+     <repository type="rpm-md" alias="Tumbleweed" imageinclude="true">
        <source path="http://download.opensuse.org/tumbleweed/repo/oss"/>
      </repository>
    </image>
@@ -496,7 +497,7 @@ In the above snippet we defined two repositories:
 1. The repository belonging to the project
    *Virtualization:Appliances:Builder* on the Open Build Service (OBS)
 
-2. The YaST repository available via the URL:
+2. The RPM repository available via the URL:
    `<http://download.opensuse.org/tumbleweed/repo/oss>`_, which will also
    be included in the final appliance.
 
@@ -511,24 +512,24 @@ following optional attributes:
   `apt-rpm`, `deb-dir`, `mirrors`, `red-carpet`, `rpm-dir`, `rpm-md`,
   `slack-site`, `up2date-mirrors`, `urpmi`, `yast2`.
   For ordinary RPM repositories use `rpm-md`, for ordinary APT repositories
-  `apt-deb`. `yast2` can be used for RPM repositories for SUSE based
-  distributions.
+  `apt-deb`.
 
-- `imageinclude`: Specify whether or not this repository should be
-  added to the resulting image, defaults to false.
+- `imageinclude`: Specify whether this repository should be added to the
+  resulting image, defaults to false.
 
 - `imageonly`: A repository with `imageonly="true"` will not be available
   during image build, but only in the resulting appliance. Defaults to
   false.
 
-- `priority`: A integer priority for all packages in this repository. If
-  the exact same package is available in more than one repository, then the
-  one with the highest priority is used.
+- `priority`: An integer priority for all packages in this repository. If
+  the same package is available in more than one repository, then the one
+  with the highest priority is used.
 
-- `alias`: Alias name to be used for this repository, it will appear as the
-  repository's name in the image. If not specified KIWI will construct an
-  alias from the path in the `source` child element (replacing each `/`
-  with a `_`).
+- `alias`: Name to be used for this repository, it will appear as the
+  repository's name in the image, which is visible via ``zypper repos`` or
+  ``dnf repolist``. KIWI will construct an alias from the path in the
+  `source` child element (replacing each `/` with a `_`), if no value is
+  given.
 
 - `repository_gpgcheck`: Specify whether or not this specific repository is
   configured to to run repository signature validation. If not set, the
@@ -561,13 +562,13 @@ following paths types:
 
 - `obs://$PROJECT/$REPOSITORY`: evaluates to the repository `$REPOSITORY`
   of the project `$PROJECT` available in the Open Build Service (OBS). By
-  default KIWI will look for projects on `<build.opensuse.org>`, but this
+  default KIWI will look for projects on `<build.opensuse.org>`_, but this
   can be overridden by providing an URL to a different OBS instance as
   follows:
 
   .. code-block:: xml
 
-     <image schemaversion="6.9" name="JeOS-Tumbleweed">
+     <image schemaversion="7.0" name="JeOS-Tumbleweed">
        <!-- snip -->
        <repository type="rpm-md" alias="test">
          <source path="obs://foo.org:myproject:test/Factory"/>
@@ -579,16 +580,18 @@ following paths types:
   available via the URL `foo.org`.
 
 - `obsrepositories:/`: special path only available for builds using the
-  Open Build Service. The configured repositories of the project to which
-  the KIWI image belongs to will be included inside the final appliance.
+  Open Build Service. The repositories configured for the OBS project in
+  which the KIWI image resides will be available inside the appliance. This
+  allows you to configure the repositories of your image from OBS itself
+  and not having to modify the image description.
 
 - `dir:///path/to/directory` or `file:///path/to/file`: an absolute path to
   a local directory or file available on the host building the
   appliance.
 
 - `iso:///path/to/image.iso`: the specified ISO image will be mounted
-  during the build of the KIWI image and the repository configured to point
-  to the mounted ISO.
+  during the build of the KIWI image and a repository will be created
+  pointing to the mounted ISO.
 
 
 .. _xml-description-adding-and-removing-packages:
@@ -603,10 +606,10 @@ removed via individual `package` child elements:
 
 .. code-block:: xml
 
-   <image schemaversion="6.9" name="JeOS-Tumbleweed">
+   <image schemaversion="7.0" name="JeOS-Tumbleweed">
      <!-- snip -->
-     <repository type="yast2" alias="Tumbleweed" imageinclude="true">
-       <source path="http://download.opensuse.org/tumbleweed/repo/oss"/>
+     <repository type="rpm-md" alias="Tumbleweed" imageinclude="true">
+       <source path="https://download.opensuse.org/tumbleweed/repo/oss"/>
      </repository>
      <packages type="bootstrap">
        <package name="udev"/>
@@ -654,7 +657,7 @@ removed), whose name is specified via the mandatory `name` attribute:
 
 .. code-block:: xml
 
-   <image schemaversion="6.9" name="JeOS-Tumbleweed">
+   <image schemaversion="7.0" name="JeOS-Tumbleweed">
      <!-- snip -->
      <packages type="bootstrap">
        <package name="udev"/>
@@ -670,7 +673,7 @@ attribute. KIWI compares the `arch` attributes value with the output of
 
 .. code-block:: xml
 
-   <image schemaversion="6.9" name="JeOS-Tumbleweed">
+   <image schemaversion="7.0" name="JeOS-Tumbleweed">
      <!-- snip -->
      <packages type="image">
        <package name="grub2"/>
@@ -690,7 +693,7 @@ Packages can be explicitly ignored inside a `packages` collection, e.g. to
 not remove certain dependencies in `<packages type="delete">`. This is
 achieved by adding a `ignore` child element with the mandatory `name`
 attribute set to the package name to be ignored during the corresponding
-transaction. Optionally one can also specify the architecture in via the
+transaction. Optionally one can also specify the architecture via the
 `arch` similarly to :ref:`xml-description-package-element`.
 
 
@@ -719,8 +722,6 @@ specified then they will be applied in a top to bottom order. If a file is
 already present in the image, then the file from the archive will overwrite
 it (same as with the image overlay).
 
-Additionally, KIWI can include the archive inside the *initrd* by setting
-the optional attribute `bootinclude` to `"true"`.
 
 .. _xml-description-product-and-namedCollection-element:
 
@@ -728,14 +729,14 @@ The `product` and `namedCollection` element
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 KIWI supports the inclusion of openSUSE products or of namedCollections
-(patterns in SUSE based distributions or groups for RedHat based
+(*patterns* in SUSE based distributions or *groups* for RedHat based
 distributions). These can be added via the `product` and `namedCollection`
 child elements, which both take the mandatory `name` attribute and the
 optional `arch` attribute.
 
 `product` and `namedCollection` can be utilized to shorten the list of
-packages that need to be added to the image description tremendously
-file. A named pattern, specified with the namedCollection element is a
+packages that need to be added to the image description tremendously. A
+named pattern, specified with the namedCollection element is a
 representation of a predefined list of packages. Specifying a pattern will
 install all packages listed in the named pattern. Support for patterns is
 distribution specific and available in SLES, openSUSE, CentOS, RHEL and

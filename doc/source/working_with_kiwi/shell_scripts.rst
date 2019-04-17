@@ -1,3 +1,5 @@
+.. _working-with-kiwi-user-defined-scripts:
+
 User defined scripts
 ====================
 
@@ -17,7 +19,7 @@ containing your new appliance:
 
 2. :file:`images.sh` is executed at the beginning of the image creation
    process. It is run on the top level of the target root tree. The script
-   is usually used to remove files that are no needed in the final
+   is usually used to remove files that are not needed in the final
    image. For example, if an appliance is being built for a specific
    hardware, unnecessary kernel drivers can be removed using this script.
 
@@ -26,21 +28,24 @@ containing your new appliance:
 Image Customization via the ``config.sh`` shell script
 ------------------------------------------------------
 
-The KIWI image description allows to have an optional :file:`config.sh`
-bash script in place. It can be used for changes appropriate for all images
-to be created from a given unpacked image (since :file:`config.sh` runs
-prior to the create step).
+The KIWI image description allows to have an :file:`config.sh` script in
+place. It can be used for changes appropriate for all images to be created
+from a given unpacked image (:file:`config.sh` runs prior to the *create
+step*). The script should add operating system configuration files which
+would be otherwise added by a user driven installer, like the activation of
+services, creation of configuration files, preparation of an environment
+for a firstboot workflow, etc.
 
-Basically the script should be designed to take over control of adding the
-image operating system configuration. Configuration in that sense means all
-tasks which runs once in an OS installation process like activating
-services, creating configuration files, prepare an environment for a
-firstboot workflow, etc. The :file:`config.sh` script is called at the end
-of the :ref:`prepare step <prepare-step>` (after users have been set and
-the *overlay tree directory* has been applied). If :file:`config.sh` exits
-with an exit code != 0 the kiwi process will exit with an error too.
+The :file:`config.sh` script is called at the end of the :ref:`prepare step
+<prepare-step>` (after users have been set and the *overlay tree directory*
+has been applied). If :file:`config.sh` exits with an exit code `!= 0` then
+KIWI will exit with an error too.
 
-See below a common template for `config.sh` script:
+KIWI will execute :file:`config.sh` directly via the operating system when
+it's executable bit is set. Otherwise KIWI will invoke :file:`config.sh`
+via bash.
+
+Find a common template for `config.sh` script below:
 
 .. code:: bash
 
@@ -78,21 +83,21 @@ See below a common template for `config.sh` script:
 Common Functions
 ^^^^^^^^^^^^^^^^
 
-The :file:`.kconfig` file allows to make use of a common set of functions.
-Functions specific to SUSE Linux specific begin with the name suse.
-Functions applicable to all linux systems starts with the name base.
-The following list describes the functions available inside the
-:file:`config.sh` script.
+The :file:`.kconfig` file provides a common set of functions.  Functions
+specific to SUSE Linux specific begin with the name ``suse``, functions
+applicable to all Linux distributions starts with the name ``base``.
+
+
+The following list describes the functions provided via :file:`.kconfig`
+in :file:`config.sh`:
 
 ``baseCleanMount``
-  Umount the system filesystems :file:`/proc`, :file:`/dev/pts`, and
-  :file:`/sys`.
-
-``baseDisableCtrlAltDel``
-  Disable the Ctrl–Alt–Del key sequence setting in :file:`/etc/inittab`.
+  Unmount the filesystems :file:`/proc`, :file:`/dev/pts`, :file:`/sys` and
+  :file:`/proc/sys/fs/binfmt_misc`.
 
 ``baseGetPackagesForDeletion``
-  Return the name(s) of packages which will be deleted.
+  Return the name(s) of the packages marked for deletion in the image
+  description.
 
 ``baseGetProfilesUsed``
   Return the name(s) of profiles used to build this image.
@@ -100,59 +105,33 @@ The following list describes the functions available inside the
 ``baseSetRunlevel {value}``
   Set the default run level.
 
-``baseSetupBoot``
-  Set up the linuxrc as init.
-
-``baseSetupBusyBox {-f}``
-  Activates busybox if installed for all links from the
-  :file:`busybox/busybox.links` file—you can choose custom apps to be forced
-  into busybox with the -f option as first parameter, for example:
-
-  .. code:: bash
-
-     baseSetupBusyBox -f /bin/zcat /bin/vi
-
-``baseSetupInPlaceGITRepository``
-  Create an in place git repository of the root directory. This process
-  may take some time and you may expect problems with binary data handling.
-
-``baseSetupInPlaceSVNRepository {path_list}``
-  Create an in place subversion repository for the specified directories.
-  A standard call could look like this baseSetupInPlaceSVNRepository
-  :file:`/etc`, :file:`/srv`, and :file:`/var/log`.
-
-``baseSetupPlainTextGITRepository``
-  Create an in place git repository of the root directory containing all
-  plain/text files.
-
 ``baseSetupUserPermissions``
   Search all home directories of all users listed in :file:`/etc/passwd` and
   change the ownership of all files to belong to the correct user and group.
 
 ``baseStripAndKeep {list of info-files to keep}``
-  Helper function for strip* functions read stdin lines of files to check
-  for removing params: files which should be keep.
+  Helper function for the ``baseStrip*`` functions, reads the list of files
+  to check from stdin for removing
+  params: files which should be kept
 
 ``baseStripDocs {list of docu names to keep``
-  Remove all documentation, except one given as parameter.
+  Remove all documentation files, except for the ones given as the
+  parameter.
 
 ``baseStripInfos {list of info-files to keep}``
-  Remove all info files, except one given as parameter.
+  Remove all info files, except for the one given as the parameter.
 
 ``baseStripLocales {list of locales}``
-  Remove all locales, except one given as parameter.
+  Remove all locales, except for the ones given as the parameter.
 
 ``baseStripMans {list of manpages to keep}``
-  Remove all manual pages, except one given as parameter
-  example:
+  Remove all manual pages, except for the ones given as the parameter.
+
+  Example:
 
   .. code:: bash
 
      baseStripMans more less
-
-``baseStripRPM``
-  Remove rpms defined in :file:`config.xml` in the packages `type=delete`
-  section.
 
 ``suseRemovePackagesMarkedForDeletion``
   Remove rpms defined in :file:`config.xml` in the packages `type=delete`

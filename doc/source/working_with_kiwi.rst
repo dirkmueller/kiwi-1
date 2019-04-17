@@ -34,7 +34,7 @@ configured system in a single file) of a Linux distribution in two steps
 KIWI executes these steps using the following components, which it expects
 to find in the *description directory*:
 
-#. ``config.xml``: :ref:`xml-description`
+#. :file:`config.xml`: :ref:`xml-description`
 
    This XML file contains the image description, which is a collection of
    general settings of the final image, like the partition table, installed
@@ -45,17 +45,14 @@ to find in the *description directory*:
    KIWI first looks for a :file:`config.xml` file. If it cannot be found,
    it picks the first :file:`*.kiwi` file.
 
-#. ``config.sh`` shell script
+#. :file:`config.sh` and :file:`images.sh`:
+   :ref:`working-with-kiwi-user-defined-scripts`
 
-   If present, this configuration shell script runs at the end of the
-   *prepare operation*. It can be used to fine tune the unpacked image in
-   ways that are not possible via the settings provided in
+   If present, these configuration shell scripts run at the end of the
+   *prepare operation* (:file:`config.sh`) or at the beginning of the
+   *create operation* (:file:`images.sh`). They can be used to fine tune
+   the image in ways that are not possible via the settings provided in
    :file:`config.xml`.
-
-#. ``images.sh`` shell script
-
-   The configuration shell script that runs at the beginning of the *create
-   operation*. It is used to handle tasks specific to an image type.
 
 #. Overlay tree directory
 
@@ -110,13 +107,6 @@ information provided in the :file:`config.xml` configuration file.
 
     Image Creation Architecture
 
-(1) Unpacked Image
-    Encapsulated system reachable via chroot
-
-(2) Packed Image
-    Encapsulated system reachable via kernel file system/extension drivers
-    such as loopback mounts, etc.
-
 
 .. _prepare-step:
 
@@ -154,8 +144,9 @@ The prepare step consists of the following substeps:
    the bootstrap environment with all required software to support the
    installation of packages into the new root tree. Note that the
    aforementioned two packages might not be enough for every distribution,
-   also consult the `kiwi-descriptions repository
-   <https://github.com/SUSE/kiwi-descriptions/>`_.
+   consult the `kiwi-descriptions repository
+   <https://github.com/SUSE/kiwi-descriptions/>`_ for examples for various
+   Linux distributions.
 
    The installation of software packages through the selected package
    manager may install unwanted packages. Removing these packages can be
@@ -173,8 +164,8 @@ The prepare step consists of the following substeps:
 
 #. **Apply Archives.**
 
-   Any archive specified in the ``archive`` element in the
-   :file:`config.xml` file is applied in the specified order (top to
+   All archives specified in the `archive` element in the
+   :file:`config.xml` file are applied in the specified order (top to
    bottom) after the overlay tree copy operation is complete (see
    :ref:`xml-description-archive-element`). Files and directories will be
    extracted relative to the top level of the new root tree. As with the
@@ -184,7 +175,7 @@ The prepare step consists of the following substeps:
 #. **Execute the user-defined script** :file:`config.sh`.
 
    At the end of the preparation stage the script :file:`config.sh` is
-   executed (if present). It is run in the top level of directory of the
+   executed (if present). It is run in the top level directory of the
    target root tree. The script's primary function is to complete the
    system configuration, for example to activate services. See
    :ref:`image-customization-config-sh` section for further details.
@@ -219,11 +210,10 @@ KIWI creates the final image during the *create step*: it converts the
 unpacked root tree into one or multiple output files appropriate for the
 respective build type.
 
-Note that it is possible to create multiple images from the same unpacked
+Note, that it is possible to create multiple images from the same unpacked
 root tree. For example, it is possible to create a self installing OEM
-image and a virtual machine image from a single unpacked root tree. The
-only prerequisite is that both image types are specified in
-:file:`config.xml`.
+image and a virtual machine image from the same image description. The only
+prerequisite is that both image types are specified in :file:`config.xml`.
 
 During the *create step* the following operations are performed by KIWI:
 
@@ -240,7 +230,5 @@ During the *create step* the following operations are performed by KIWI:
 
 #. **Create the Requested Image Type.**
 
-   The image types that can be created from a prepared image tree depend on
-   the types specified in the image description file. The configuration
-   file must contain at least one ``type`` element. see:
-   :ref:`building_types`.
+   KIWI converts the unpacked root into an output format appropriate for
+   the requested build type.
